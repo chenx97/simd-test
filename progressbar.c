@@ -40,7 +40,7 @@ sem_t *job_server;
 pthread_mutex_t mutex;
 volatile int counter;
 
-struct __jmp_buf_tag env = {};
+jmp_buf env = {};
 
 // A, B, C matrices
 double __attribute__((aligned(32))) matrixA[N][M],
@@ -54,7 +54,7 @@ void *multiplyRowGPR(void *arg);
 void printMatrix(int r, int c, double matrix[r][c]);
 void printProgress(void *progress);
 
-void handler(int sig) { longjmp(&env, 130); }
+void handler(int sig) { longjmp(env, 130); }
 
 int main(int argc, char **argv)
 {
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
         ideal_threads = ideal_threads > 200 ? 200 : ideal_threads;
     }
     job_server = sem_open("progressbar", O_CREAT, 0644, ideal_threads);
-    int exit_code = setjmp(&env);
+    int exit_code = setjmp(env);
     if (exit_code)
         goto cleanup;
     for (i = 0; i < t_count; i++)
